@@ -14,8 +14,8 @@
 
 ## 🔗 바로가기
 
-- 서비스 바로가기: https://sen-vip.github.io/kockgum/
-- GitHub 저장소: https://github.com/sen-vip/kockgum
+- 서비스 바로가기: https://sen-vip.github.io/kockgum-insur/
+- GitHub 저장소: https://github.com/sen-vip/kockgum-insur
 
 ---
 
