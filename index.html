@@ -4,73 +4,219 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>콕검 · 보험서류 검토 보조 웹앱</title>
-  <style>
-    :root{--bg:#f6f8fb;--surface:#fff;--text:#111827;--sub:#667085;--line:#e5e9f0;--blue:#2563eb;--blue-dark:#1d4ed8;--blue-soft:#eef5ff;--green:#16a34a;--green-soft:#effdf5;--amber:#f59e0b;--amber-soft:#fff8e8;--red:#e5484d;--red-soft:#fff1f2;--shadow:0 18px 45px rgba(15,23,42,.08)}
-    *{box-sizing:border-box} body{margin:0;font-family:Pretendard,SUIT,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",Arial,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 42%,#f8fafc 100%);color:var(--text)}
-    a{color:inherit} .app{max-width:1120px;margin:0 auto;padding:28px 18px 52px}.hero{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:20px}.logo-row{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:17px;background:#111827;color:#fff;display:grid;place-items:center;font-size:23px;font-weight:900;box-shadow:var(--shadow)} h1{margin:0;font-size:36px;letter-spacing:-.05em}.subtitle{margin:4px 0 0;color:var(--sub);font-weight:800}.hero-desc{font-size:20px;line-height:1.45;margin:28px 0 12px;font-weight:900;letter-spacing:-.03em}.hero-desc span{display:block}.hero-copy{margin:0;color:#475467;line-height:1.7}.top-links{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}.pill,.link-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.82);font-size:13px;font-weight:900;text-decoration:none}.link-btn{border-color:#d5e3ff;color:#174ea6;background:#f8fbff}.link-btn:hover{background:#edf5ff}.panel{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:var(--shadow);margin:14px 0}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.step{border:1px solid var(--line);background:#fff;border-radius:18px;padding:13px;font-weight:900;color:#344054}.step b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#111827;color:#fff;margin-right:6px}.section-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:14px}.section-head h2{margin:0;font-size:20px;letter-spacing:-.03em}.section-head p{margin:6px 0 0;color:var(--sub);font-size:13px;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.check-card{position:relative;border:1px solid var(--line);border-radius:16px;background:#fbfcff;padding:12px 12px 12px 40px;min-height:48px;font-weight:900}.check-card input{position:absolute;left:14px;top:15px}.advanced{margin-top:12px;border-top:1px dashed var(--line);padding-top:14px}.advanced summary{cursor:pointer;font-weight:900;color:#344054}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.field label{display:block;font-size:12px;font-weight:900;color:#475467;margin:0 0 6px}.input,.textarea{width:100%;border:1px solid #d9e2ef;border-radius:14px;padding:11px 12px;font:inherit;background:#fff}.textarea{min-height:86px;resize:vertical}.dropzone{border:2px dashed #cbd8ea;background:#fbfdff;border-radius:22px;padding:28px;text-align:center;transition:.15s}.dropzone.drag{border-color:var(--blue);background:var(--blue-soft)}.drop-icon{font-size:34px;margin-bottom:8px}.file-row{display:flex;justify-content:space-between;gap:10px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 12px;margin:8px 0}.btn{border:0;border-radius:14px;padding:11px 15px;font-weight:900;cursor:pointer;font-family:inherit}.btn.primary{background:var(--blue);color:#fff}.btn.primary:hover{background:var(--blue-dark)}.btn.ghost{background:#fff;border:1px solid var(--line);color:#344054}.btn.danger{background:var(--red-soft);color:#b42318}.actions{display:flex;flex-wrap:wrap;gap:8px}.status-box{display:none;border-radius:18px;padding:14px;background:var(--blue-soft);border:1px solid #d5e3ff;margin-top:12px}.status-box.show{display:block}.meter{height:9px;background:#d8e7ff;border-radius:999px;overflow:hidden;margin-top:10px}.meter span{display:block;height:100%;width:15%;background:var(--blue);transition:.2s}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary-card{border:1px solid var(--line);border-radius:18px;padding:14px;background:#fff}.summary-card strong{display:block;font-size:24px}.ok{background:var(--green-soft)}.need{background:var(--amber-soft)}.miss{background:var(--red-soft)}.hard{background:#f2f4f7}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px}table{width:100%;border-collapse:collapse;background:#fff}th,td{border-bottom:1px solid var(--line);padding:11px;text-align:left;font-size:13px;vertical-align:top}th{background:#f8fafc;color:#475467;font-weight:900;white-space:nowrap}.tag{display:inline-flex;border-radius:999px;padding:4px 8px;font-weight:900;font-size:12px}.tag.ok{color:#027a48}.tag.need{color:#b54708}.tag.miss{color:#b42318}.tag.hard{color:#475467}.opinion{white-space:pre-wrap;line-height:1.7;background:#fcfcfd}.footer{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:24px;color:#667085;font-size:13px;font-weight:800}.scroll-top{position:fixed;right:18px;bottom:18px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);font-size:18px;cursor:pointer}.hidden{display:none!important}@media(max-width:780px){.hero{display:block}.top-links{justify-content:flex-start;margin-top:14px}.steps,.grid,.summary,.form-grid{grid-template-columns:1fr}.panel{padding:16px}h1{font-size:30px}.hero-desc{font-size:18px}}@media print{.top-links,.actions,.dropzone,.scroll-top,.advanced{display:none!important}body{background:#fff}.app{max-width:none;padding:8px}.panel{box-shadow:none;break-inside:avoid}}
-  </style>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <main class="app">
-    <header class="hero">
-      <div>
-        <div class="logo-row"><div class="logo">콕</div><div><h1>콕검</h1><p class="subtitle">보험서류 검토 보조 웹앱</p></div></div>
-        <p class="hero-desc"><span>파일은 내 PC에,</span><span>검토 포인트는 한눈에.</span></p>
-        <p class="hero-copy">화재보험 · 영업배상책임 · 생산물배상책임 · 여행자보험 항목 여부와 보험기간, 업체명, 주소 후보를 정해진 체크리스트로 확인해요.</p>
+  <header class="topbar" id="top">
+    <div class="topbar-inner">
+      <div class="brand-group">
+        <div class="brand-mark" aria-hidden="true">콕</div>
+        <div>
+          <h1>콕검</h1>
+          <p>보험서류 검토 보조 웹앱</p>
+        </div>
       </div>
-      <nav class="top-links" aria-label="바로가기">
-        <span class="pill">서버 전송 없음</span>
-        <a class="link-btn" href="https://sen-vip.github.io/kockgum/" target="_blank" rel="noopener noreferrer">서비스 바로가기 ↗</a>
-        <a class="link-btn" href="https://github.com/sen-vip/kockgum" target="_blank" rel="noopener noreferrer">GitHub 저장소 ↗</a>
-        <a class="link-btn" href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ 맨 위로</a>
+      <nav class="top-actions" aria-label="상단 바로가기">
+        <span class="security-chip">🛡 서버 전송 없음</span>
+        <a href="#" id="githubLink">GitHub</a>
+        <span>senvip</span>
+        <button type="button" class="top-btn" id="topButton" aria-label="맨 위로 이동">↑</button>
       </nav>
-    </header>
+    </div>
+  </header>
 
-    <section class="panel">
-      <div class="pill">보험 콕검 v0.2 · GitHub 링크 반영</div>
-      <div class="steps"><div class="step"><b>1</b> 확인 항목 선택</div><div class="step"><b>2</b> 파일 올리기</div><div class="step"><b>3</b> 콕검 시작</div><div class="step"><b>4</b> 결과 확인</div></div>
+  <main class="page-shell">
+    <section class="hero card-soft">
+      <div class="hero-copy">
+        <span class="eyebrow">보험 콕검 v0.1</span>
+        <h2>파일은 내 PC에,<br />검토 포인트는 한눈에.</h2>
+        <p class="lead">보험서류에서 확인할 부분을 콕 짚어줍니다.</p>
+        <p class="description">화재보험 · 영업배상책임 · 생산물배상책임 · 여행자보험 항목 여부와 보험기간, 업체명, 주소 후보를 정해진 체크리스트로 확인해요.</p>
+        <div class="hero-badges" aria-label="핵심 특징">
+          <span>🛡 서버 전송 없음</span>
+          <span>📌 확인 포인트 자동 정리</span>
+          <span>📄 검토표 다운로드</span>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="document-illust">
+          <div></div><div></div><div></div><div></div>
+          <span>✓</span>
+        </div>
+      </div>
     </section>
 
-    <section class="panel">
-      <div class="section-head"><div><h2>1. 확인할 항목 선택</h2><p>기본 항목은 모두 선택되어 있어요. 필요 없는 항목만 해제하세요.</p></div></div>
-      <h3>보험 유형</h3><div class="grid" id="typeChecks"></div>
-      <h3>공통 확인 항목</h3><div class="grid" id="commonChecks"></div>
-      <details class="advanced"><summary>고급 옵션 열기</summary><div class="form-grid"><div class="field"><label for="contractName">계약명</label><input id="contractName" class="input" placeholder="예: 현장체험학습 차량 임차" /></div><div class="field"><label for="baseVendor">기준 업체명</label><input id="baseVendor" class="input" placeholder="예: ○○관광" /></div></div><p style="color:#667085;font-size:13px">기준 업체명을 입력하면 서류에서 찾은 업체명 후보와 비교합니다. 입력하지 않아도 콕검은 실행됩니다.</p></details>
+    <section class="steps" aria-label="진행 단계">
+      <div class="step is-active" data-step="1"><span>1</span> 확인 항목 선택</div>
+      <div class="step" data-step="2"><span>2</span> 파일 올리기</div>
+      <div class="step" data-step="3"><span>3</span> 콕검 시작</div>
+      <div class="step" data-step="4"><span>4</span> 결과 확인</div>
     </section>
 
-    <section class="panel"><div class="section-head"><div><h2>2. 보험서류 올리기</h2><p>파일명은 상관없습니다. 내용 기준으로 분석합니다.</p></div></div><label id="dropzone" class="dropzone"><div class="drop-icon">↑</div><strong>PDF, JPG, PNG 파일을 올려주세요</strong><p>또는 파일을 이곳으로 끌어다 놓으세요</p><button class="btn ghost" type="button">파일 선택하기</button><input id="fileInput" type="file" accept=".pdf,.jpg,.jpeg,.png" multiple hidden /></label><p style="font-size:13px;color:#667085">지원 형식: PDF · JPG · PNG / 최대 10개 권장 / 선택한 파일은 서버로 전송되지 않고 현재 브라우저에서만 분석됩니다.</p><h3>업로드한 파일</h3><div id="fileList"><p style="color:#667085">총 0개 파일</p></div></section>
+    <section class="card section-card" id="checkOptions">
+      <div class="section-head">
+        <div>
+          <h3>1. 확인할 항목 선택</h3>
+          <p>기본 항목은 모두 선택되어 있어요. 필요 없는 항목만 해제하세요.</p>
+        </div>
+      </div>
 
-    <section class="panel"><div class="section-head"><div><h2>3. 콕검 시작</h2><p>준비가 끝났으면 보험서류를 읽고 확인 포인트를 정리합니다.</p></div><div class="actions"><button id="resetBtn" class="btn danger">입력 초기화</button><button id="analyzeBtn" class="btn primary">콕검 시작하기</button></div></div><div id="statusBox" class="status-box"><strong>콕검 중입니다</strong><p id="statusText">보험서류 안의 문구를 읽고 확인 항목을 정리하고 있어요.</p><div class="meter"><span id="meterBar"></span></div><p style="font-size:13px;color:#667085">스캔본이나 흐린 이미지는 글자 인식이 느릴 수 있습니다.</p></div></section>
+      <div class="option-group">
+        <h4>보험 유형</h4>
+        <div class="check-grid">
+          <label><input type="checkbox" name="type" value="fire" checked /> 화재보험</label>
+          <label><input type="checkbox" name="type" value="business" checked /> 영업배상책임보험</label>
+          <label><input type="checkbox" name="type" value="product" checked /> 생산물배상책임보험</label>
+          <label><input type="checkbox" name="type" value="travel" checked /> 여행자보험</label>
+        </div>
+      </div>
 
-    <section class="panel"><div class="section-head"><div><h2>4. 콕검 결과</h2><p>보험서류 검토 포인트를 정리했습니다.</p></div></div><div class="summary"><div class="summary-card ok"><strong id="okCount">0</strong>확인됨</div><div class="summary-card need"><strong id="needCount">0</strong>확인 필요</div><div class="summary-card miss"><strong id="missCount">0</strong>누락 의심</div><div class="summary-card hard"><strong id="hardCount">0</strong>분석 어려움</div></div><p style="color:#667085;font-size:13px">최종 판단은 담당자가 원본 서류를 확인해 주세요.</p><h3>필수 항목 체크리스트</h3><div class="table-wrap"><table><thead><tr><th>검토 항목</th><th>상태</th><th>확인 내용</th></tr></thead><tbody id="checkBody"></tbody></table></div><h3>파일별 분석 결과</h3><div id="fileResults" class="table-wrap"><table><thead><tr><th>파일명</th><th>읽은 글자 수</th><th>발견 단서</th></tr></thead><tbody></tbody></table></div><h3>검토 의견</h3><div class="table-wrap"><div id="opinion" class="opinion" style="padding:14px">아직 분석 결과가 없습니다.</div></div><div class="actions" style="margin-top:12px"><button id="copyOpinionBtn" class="btn ghost">검토 의견 복사</button><button id="downloadTxtBtn" class="btn ghost">TXT 저장</button><button id="downloadTableBtn" class="btn primary">엑셀 검토표 다운로드</button><button id="copyAllBtn" class="btn ghost">결과 전체 복사</button></div></section>
+      <div class="option-group">
+        <h4>공통 확인 항목</h4>
+        <div class="check-grid compact">
+          <label><input type="checkbox" name="common" value="period" checked /> 보험기간</label>
+          <label><input type="checkbox" name="common" value="vendor" checked /> 업체명 후보</label>
+          <label><input type="checkbox" name="common" value="address" checked /> 주소 후보</label>
+        </div>
+      </div>
 
-    <footer class="footer"><span>콕검 · 보험서류 검토 보조 웹앱</span><span><a href="https://github.com/sen-vip/kockgum" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="https://sen-vip.github.io/kockgum/" target="_blank" rel="noopener noreferrer">서비스 바로가기</a> · senvip · v0.2</span><span>서버 전송 없음 · 브라우저 내부 분석</span></footer>
-  </main><button class="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script>
-    const repoUrl='https://github.com/sen-vip/kockgum', siteUrl='https://sen-vip.github.io/kockgum/';
-    const typeItems=[['fire','화재보험',['화재','건물','시설소유','재산종합','보험가입증명서']],['business','영업배상책임보험',['영업배상','영업배상책임','시설소유자','배상책임']],['product','생산물배상책임보험',['생산물배상','생산물배상책임','PL보험']],['travel','여행자보험',['여행자보험','국내여행','해외여행','상해사망','상해후유','질병','배상책임']]];
-    const commonItems=[['period','보험기간',['보험기간','가입기간','보장기간','유효기간','기간']],['vendor','업체명 후보',['상호','업체명','피보험자','계약자','대표자']],['address','주소 후보',['주소','소재지','사업장','사업장 주소']]];
-    let files=[], results=[]; const $=id=>document.getElementById(id);
-    function renderChecks(){ $('typeChecks').innerHTML=typeItems.map(([id,label])=>`<label class="check-card"><input type="checkbox" data-kind="type" value="${id}" checked> ${label}</label>`).join(''); $('commonChecks').innerHTML=commonItems.map(([id,label])=>`<label class="check-card"><input type="checkbox" data-kind="common" value="${id}" checked> ${label}</label>`).join(''); }
-    function renderFiles(){ $('fileList').innerHTML=files.length?`<p style="color:#667085">총 ${files.length}개 파일</p>`+files.map((f,i)=>`<div class="file-row"><span>${f.name}</span><button class="btn ghost" onclick="removeFile(${i})">삭제</button></div>`).join(''):'<p style="color:#667085">총 0개 파일</p>'; }
-    window.removeFile=i=>{files.splice(i,1);renderFiles();};
-    function addFiles(list){ const incoming=[...list].filter(f=>/pdf|image|png|jpe?g/i.test(f.type)||/\.(pdf|png|jpe?g)$/i.test(f.name)); files=[...files,...incoming].slice(0,10); renderFiles(); }
-    const dz=$('dropzone'); dz.addEventListener('click',e=>{ if(e.target.tagName!=='INPUT') $('fileInput').click();}); $('fileInput').addEventListener('change',e=>addFiles(e.target.files)); ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag')})); ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag')})); dz.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
-    async function extractText(file){ if(file.type.includes('pdf')||/\.pdf$/i.test(file.name)){ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; const data=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data}).promise; let text=''; for(let p=1;p<=pdf.numPages;p++){ const page=await pdf.getPage(p); const content=await page.getTextContent(); text += content.items.map(i=>i.str).join(' ')+'\n'; } return text; } const {data}=await Tesseract.recognize(file,'kor+eng'); return data.text||''; }
-    function hasAny(text,words){ const t=text.replace(/\s+/g,''); return words.some(w=>t.includes(w.replace(/\s+/g,''))); }
-    function findSnips(text,words){ const clean=text.replace(/\s+/g,' '); const found=words.filter(w=>clean.includes(w)||text.replace(/\s+/g,'').includes(w.replace(/\s+/g,''))); return found.slice(0,4).join(', ')||'단서 부족'; }
-    function statusFor(text,words){ if(!text.trim()) return ['hard','분석 어려움','글자를 읽지 못했습니다. 원본 서류를 직접 확인해 주세요.']; return hasAny(text,words)?['ok','확인됨',`관련 문구 발견: ${findSnips(text,words)}`]:['miss','누락 의심','선택한 항목과 직접 일치하는 문구를 찾지 못했습니다. 원본 서류 확인 필요']; }
-    function vendorCandidates(text){ const arr=[]; const patterns=[/상\s*호\s*[:：]?\s*([^\n]{2,40})/g,/업체명\s*[:：]?\s*([^\n]{2,40})/g,/피보험자\s*[:：]?\s*([^\n]{2,40})/g,/계약자\s*[:：]?\s*([^\n]{2,40})/g]; for(const re of patterns){let m; while((m=re.exec(text))&&arr.length<6){arr.push(m[1].replace(/대표자|주소|사업장.*/g,'').trim());}} return [...new Set(arr)].filter(Boolean).slice(0,5); }
-    function addrCandidates(text){ return [...new Set((text.match(/[가-힣]{2,}(?:특별시|광역시|도)\s+[가-힣0-9\s\-로길동읍면구시군]+/g)||[]).map(x=>x.trim()))].slice(0,3); }
-    function buildRows(fullText){ const selectedTypes=[...document.querySelectorAll('input[data-kind="type"]:checked')].map(x=>x.value); const selectedCommon=[...document.querySelectorAll('input[data-kind="common"]:checked')].map(x=>x.value); const rows=[]; for(const [id,label,words] of typeItems.filter(x=>selectedTypes.includes(x[0]))){ const [cls,st,msg]=statusFor(fullText,words); rows.push({item:label,cls,st,msg}); } for(const [id,label,words] of commonItems.filter(x=>selectedCommon.includes(x[0]))){ let cls,st,msg; if(id==='vendor'){ const v=vendorCandidates(fullText); cls=v.length?'need':'miss'; st=v.length?'확인 필요':'누락 의심'; msg=v.length?`업체명 후보: ${v.join(' / ')}${$('baseVendor').value.trim()?` · 기준 업체명(${ $('baseVendor').value.trim() })과 직접 비교 필요`:''}`:'업체명으로 보이는 문구를 찾지 못했습니다.'; } else if(id==='address'){ const a=addrCandidates(fullText); cls=a.length?'need':'miss'; st=a.length?'확인 필요':'누락 의심'; msg=a.length?`주소 후보: ${a.join(' / ')}`:'주소 후보를 찾지 못했습니다.'; } else { [cls,st,msg]=statusFor(fullText,words); } rows.push({item:label,cls,st,msg}); } return rows; }
-    function tag(row){ const label={ok:'확인됨',need:'확인 필요',miss:'누락 의심',hard:'분석 어려움'}[row.cls]||row.st; return `<span class="tag ${row.cls}">${label}</span>`; }
-    function renderResults(rows,fileInfos){ const counts={ok:0,need:0,miss:0,hard:0}; rows.forEach(r=>counts[r.cls]++); $('okCount').textContent=counts.ok; $('needCount').textContent=counts.need; $('missCount').textContent=counts.miss; $('hardCount').textContent=counts.hard; $('checkBody').innerHTML=rows.map(r=>`<tr><td>${r.item}</td><td>${tag(r)}</td><td>${r.msg}</td></tr>`).join(''); $('fileResults').querySelector('tbody').innerHTML=fileInfos.map(f=>`<tr><td>${f.name}</td><td>${f.len.toLocaleString()}자</td><td>${f.clues}</td></tr>`).join(''); const opinion=[`[콕검 검토 의견]`, $('contractName').value.trim()?`계약명: ${$('contractName').value.trim()}`:null, $('baseVendor').value.trim()?`기준 업체명: ${$('baseVendor').value.trim()}`:null,`확인됨 ${counts.ok}건 / 확인 필요 ${counts.need}건 / 누락 의심 ${counts.miss}건 / 분석 어려움 ${counts.hard}건`,``,...rows.map(r=>`- ${r.item}: ${r.st} — ${r.msg}`),``,`※ 콕검은 서류의 존재 여부와 확인 포인트를 정리하는 보조 도구입니다. 보상한도, 유효기간, 가입금액 등 최종 적정성은 담당자가 원본 서류와 학교 기준에 따라 확인해야 합니다.`].filter(Boolean).join('\n'); $('opinion').textContent=opinion; results=rows; }
-    async function analyze(){ if(!files.length){alert('먼저 파일을 올려주세요.');return;} $('statusBox').classList.add('show'); $('meterBar').style.width='10%'; let all='', infos=[]; for(let i=0;i<files.length;i++){ $('statusText').textContent=`현재 진행: ${files[i].name} 읽는 중 (${i+1}/${files.length})`; try{ const text=await extractText(files[i]); all+=`\n\n[${files[i].name}]\n${text}`; const clues=[...typeItems,...commonItems].map(x=>findSnips(text,x[2])).filter(x=>x!=='단서 부족').slice(0,5).join(' / ')||'단서 부족'; infos.push({name:files[i].name,len:text.length,clues}); }catch(e){ infos.push({name:files[i].name,len:0,clues:'분석 어려움'}); } $('meterBar').style.width=`${Math.round(((i+1)/files.length)*85)+10}%`; } const rows=buildRows(all); renderResults(rows,infos); $('statusText').textContent='현재 진행: 완료'; $('meterBar').style.width='100%'; }
-    function download(name,content,type='text/plain'){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
-    function copy(txt){ navigator.clipboard?.writeText(txt).catch(()=>{}); }
-    $('analyzeBtn').addEventListener('click',analyze); $('resetBtn').addEventListener('click',()=>{files=[];results=[];renderFiles();renderResults([],[]);$('statusBox').classList.remove('show');}); $('copyOpinionBtn').addEventListener('click',()=>copy($('opinion').textContent)); $('downloadTxtBtn').addEventListener('click',()=>download('kockgum-review.txt',$('opinion').textContent)); $('copyAllBtn').addEventListener('click',()=>copy($('opinion').textContent+'\n\n'+[...document.querySelectorAll('#checkBody tr')].map(tr=>[...tr.children].map(td=>td.innerText).join('\t')).join('\n'))); $('downloadTableBtn').addEventListener('click',()=>{ const rows=[['검토 항목','상태','확인 내용'],...results.map(r=>[r.item,r.st,r.msg])]; const html='<html><head><meta charset="UTF-8"></head><body><table border="1">'+rows.map(r=>'<tr>'+r.map(c=>`<td>${String(c).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}</td>`).join('')+'</tr>').join('')+'</table></body></html>'; download('kockgum-review-table.xls',html,'application/vnd.ms-excel'); });
-    renderChecks(); renderFiles(); renderResults([],[]);
-  </script>
+      <details class="advanced-box">
+        <summary>고급 옵션 열기</summary>
+        <div class="form-grid">
+          <label>
+            계약명
+            <input type="text" id="contractName" placeholder="예: 2026학년도 통학버스 보험서류 검토" />
+          </label>
+          <label>
+            기준 업체명
+            <input type="text" id="vendorName" placeholder="예: ○○관광" />
+          </label>
+        </div>
+        <p class="hint">기준 업체명을 입력하면 서류에서 찾은 업체명 후보와 비교합니다. 입력하지 않아도 콕검은 실행됩니다.</p>
+      </details>
+    </section>
+
+    <section class="card section-card" id="uploadSection">
+      <div class="section-head">
+        <div>
+          <h3>2. 보험서류 올리기</h3>
+          <p>파일명은 상관없습니다. 내용 기준으로 분석합니다.</p>
+        </div>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" multiple hidden />
+        <div class="upload-icon">↑</div>
+        <strong>PDF, JPG, PNG 파일을 올려주세요</strong>
+        <p>또는 파일을 이곳으로 끌어다 놓으세요</p>
+        <button type="button" class="primary small" id="selectFileButton">파일 선택하기</button>
+      </div>
+
+      <div class="upload-info">
+        <span>지원 형식: PDF · JPG · PNG</span>
+        <span>최대 10개까지 선택 가능</span>
+        <span>권장: 파일 1개당 10MB 이하 · 전체 50MB 이하</span>
+      </div>
+      <p class="security-note">🛡 선택한 파일은 서버로 전송되지 않고 현재 브라우저에서만 분석됩니다.</p>
+    </section>
+
+    <section class="card section-card hidden" id="fileListSection">
+      <div class="section-head simple">
+        <h3>업로드한 파일</h3>
+        <span id="fileTotalText">총 0개 파일</span>
+      </div>
+      <ul class="file-list" id="fileList"></ul>
+    </section>
+
+    <section class="card section-card action-card" id="runSection">
+      <h3>3. 콕검 시작</h3>
+      <p>준비가 끝났으면 보험서류를 읽고 확인 포인트를 정리합니다.</p>
+      <div class="action-row">
+        <button type="button" class="ghost" id="resetButton">입력 초기화</button>
+        <button type="button" class="primary" id="runButton" disabled>콕검 시작하기</button>
+      </div>
+    </section>
+
+    <section class="card section-card progress-card hidden" id="progressSection" aria-live="polite">
+      <h3>콕검 중입니다</h3>
+      <p>보험서류 안의 문구를 읽고 확인 항목을 정리하고 있어요.</p>
+      <div class="progress-meta" id="progressText">현재 진행: 준비 중</div>
+      <div class="progressbar" aria-hidden="true"><div id="progressFill"></div></div>
+      <p class="hint">스캔본이나 흐린 이미지는 글자 인식이 느릴 수 있습니다.</p>
+    </section>
+
+    <section class="results hidden" id="resultsSection">
+      <section class="card section-card">
+        <div class="section-head">
+          <div>
+            <h3>4. 콕검 결과</h3>
+            <p>보험서류 검토 포인트를 정리했습니다.</p>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary ok"><span>확인됨</span><strong id="okCount">0건</strong></div>
+          <div class="summary warn"><span>확인 필요</span><strong id="warnCount">0건</strong></div>
+          <div class="summary danger"><span>누락 의심</span><strong id="missingCount">0건</strong></div>
+          <div class="summary gray"><span>분석 어려움</span><strong id="hardCount">0건</strong></div>
+        </div>
+        <p class="notice">최종 판단은 담당자가 원본 서류를 확인해 주세요.</p>
+      </section>
+
+      <section class="card section-card">
+        <h3>필수 항목 체크리스트</h3>
+        <div class="table-wrap">
+          <table class="result-table">
+            <thead>
+              <tr><th>검토 항목</th><th>상태</th><th>확인 내용</th></tr>
+            </thead>
+            <tbody id="checklistBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card section-card">
+        <h3>파일별 분석 결과</h3>
+        <div class="file-analysis" id="fileAnalysis"></div>
+      </section>
+
+      <section class="card section-card">
+        <details class="points-box">
+          <summary>확인 포인트 자세히 보기</summary>
+          <div id="pointsContent" class="points-content"></div>
+        </details>
+      </section>
+
+      <section class="card section-card">
+        <h3>검토 의견</h3>
+        <textarea id="opinionText" rows="7" readonly></textarea>
+        <div class="action-row end">
+          <button type="button" class="ghost" id="copyOpinionButton">검토 의견 복사</button>
+          <button type="button" class="ghost" id="saveTxtButton">TXT 저장</button>
+        </div>
+      </section>
+
+      <section class="card section-card download-card">
+        <div>
+          <h3>결과 저장</h3>
+          <p>검토 결과를 표 형태 파일로 내려받을 수 있습니다.</p>
+        </div>
+        <div class="download-actions">
+          <button type="button" class="success" id="downloadCsvButton">엑셀 검토표 다운로드</button>
+          <button type="button" class="ghost" id="copyAllButton">결과 전체 복사</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <button type="button" class="floating-top" id="floatingTopButton" aria-label="맨 위로 이동">↑</button>
+
+  <footer class="footer">
+    <p>콕검 · 보험서류 검토 보조 웹앱</p>
+    <p>senvip · GitHub · v0.1</p>
+    <p>서버 전송 없음 · 브라우저 내부 분석</p>
+  </footer>
 </body>
 </html>
