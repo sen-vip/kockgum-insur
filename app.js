@@ -43,7 +43,12 @@
     downloadCsvButton: $('#downloadCsvButton'),
     copyAllButton: $('#copyAllButton'),
     topButton: $('#topButton'),
-    floatingTopButton: $('#floatingTopButton')
+    floatingTopButton: $('#floatingTopButton'),
+    bottomStatus: $('#bottomStatus'),
+    bottomRunButton: $('#bottomRunButton'),
+    bottomResetButton: $('#bottomResetButton'),
+    inputSummary: $('#inputSummary'),
+    inputSummaryText: $('#inputSummaryText')
   };
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -62,6 +67,10 @@
   els.copyAllButton.addEventListener('click', copyAllResults);
   els.topButton.addEventListener('click', scrollTop);
   els.floatingTopButton.addEventListener('click', scrollTop);
+  els.bottomRunButton?.addEventListener('click', runAnalysis);
+  els.bottomResetButton?.addEventListener('click', resetAll);
+  $$('input[type="checkbox"]').forEach(input => input.addEventListener('change', updateBottomAction));
+  updateBottomAction();
 
   ['dragenter', 'dragover'].forEach(type => {
     els.dropzone.addEventListener(type, (event) => {
@@ -122,11 +131,16 @@
     if (!state.files.length) {
       els.fileListSection.classList.add('hidden');
       els.runButton.disabled = true;
+    if (els.bottomRunButton) els.bottomRunButton.disabled = true;
+      if (els.bottomRunButton) els.bottomRunButton.disabled = true;
+      updateBottomAction();
       return;
     }
 
     els.fileListSection.classList.remove('hidden');
     els.runButton.disabled = false;
+    if (els.bottomRunButton) els.bottomRunButton.disabled = false;
+    updateBottomAction();
     const totalSize = state.files.reduce((sum, file) => sum + file.size, 0);
     els.fileTotalText.textContent = `총 ${state.files.length}개 파일 · ${formatBytes(totalSize)}`;
 
@@ -145,6 +159,7 @@
       button.addEventListener('click', () => {
         state.files.splice(Number(button.dataset.index), 1);
         renderFileList();
+        updateStep(state.files.length ? 3 : 1);
       });
     });
   }
@@ -156,6 +171,7 @@
     els.progressSection.classList.remove('hidden');
     els.resultsSection.classList.add('hidden');
     els.runButton.disabled = true;
+    if (els.bottomRunButton) els.bottomRunButton.disabled = true;
 
     state.extractedTexts = [];
     state.fileResults = [];
@@ -204,6 +220,7 @@
       updateStep(5);
     } finally {
       els.runButton.disabled = false;
+      if (els.bottomRunButton) els.bottomRunButton.disabled = false;
       setTimeout(() => els.progressSection.classList.add('hidden'), 250);
     }
   }
@@ -444,6 +461,11 @@
     `).join('');
 
     els.opinionText.value = state.opinion;
+    document.body.classList.add('is-analyzed');
+    const typeCount = selectedValues('type').length;
+    if (els.inputSummaryText) els.inputSummaryText.textContent = `${typeCount ? typeCount + '개 보험 항목' : '선택 항목 없음'} · 파일 ${state.files.length}개 분석 완료`;
+    els.inputSummary?.classList.remove('hidden');
+    updateBottomAction();
     els.resultsSection.classList.remove('hidden');
     els.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -551,7 +573,8 @@
   }
 
   function updateStep(active) {
-    const current = Number(active);
+    const raw = Number(active);
+    const current = raw >= 5 ? 3 : raw === 4 ? 2 : 1;
     $$('.step').forEach(step => {
       const stepNo = Number(step.dataset.step);
       step.classList.toggle('is-active', stepNo === current);
@@ -562,6 +585,18 @@
       step.classList.toggle('is-active', stepNo === current);
       step.classList.toggle('is-done', stepNo < current);
     });
+    $$('.flow-card').forEach((card, index) => {
+      const stepNo = index + 1;
+      card.classList.toggle('is-active', stepNo === Math.min(current, 3));
+      card.classList.toggle('is-done', stepNo < Math.min(current, 3));
+    });
+  }
+
+  function updateBottomAction() {
+    const selectedCount = $$('input[type="checkbox"]:checked').length;
+    if (els.bottomStatus) els.bottomStatus.textContent = `선택 항목 ${selectedCount}개 · 파일 ${state.files.length}개`;
+    const disabled = !state.files.length || els.runButton.disabled;
+    if (els.bottomRunButton) els.bottomRunButton.disabled = disabled;
   }
 
   function formatBytes(bytes) {
@@ -652,6 +687,9 @@
     renderFileList();
     els.progressSection.classList.add('hidden');
     els.resultsSection.classList.add('hidden');
+    els.inputSummary?.classList.add('hidden');
+    document.body.classList.remove('is-analyzed');
+    updateBottomAction();
     updateStep(1);
     scrollTop();
   }

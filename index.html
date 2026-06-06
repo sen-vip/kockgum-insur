@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>보험콕검 · 보험서류 검토 보조 웹앱</title>
+  <title>보험콕검 · 보험서류 확인 보조도구</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <meta name="theme-color" content="#f8fbff" />
+  <meta name="description" content="보험콕검은 건물화재보험, 배상책임보험, 여행자보험 등 보험서류 확인 포인트를 정리하는 브라우저 기반 보조도구입니다." />
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
@@ -13,16 +18,16 @@
   <header class="topbar" id="top">
     <div class="topbar-inner">
       <div class="brand-group">
-        <div class="brand-mark" aria-hidden="true">보</div>
-        <div>
+        <div class="brand-mark" aria-hidden="true"><img src="favicon.png" alt="" /></div>
+        <div class="brand-copy">
           <h1>보험콕검</h1>
-          <p>건물화재보험 · 배상책임보험 서류 확인 보조</p>
+          <p>보험서류 확인 포인트를 한눈에 정리합니다.</p>
         </div>
       </div>
       <nav class="top-actions" aria-label="상단 바로가기">
-        <span class="security-chip">🛡 서버 전송 없음</span>
-        <a href="https://github.com/sen-vip/kockgum" id="githubLink" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <span>senvip</span>
+        <span class="security-chip">서버 전송 없음</span>
+        <a href="https://github.com/sen-vip/kockgum-insur" id="githubLink" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="version-chip">v0.1</span>
         <button type="button" class="top-btn" id="topButton" aria-label="맨 위로 이동">↑</button>
       </nav>
     </div>
@@ -33,206 +38,255 @@
       <aside class="side-status" aria-label="보험콕검 진행상태">
         <div class="side-status-title">진행상태</div>
         <ol>
-          <li class="status-step is-active" data-step="1"><span>1</span><strong>검토 조건</strong></li>
-          <li class="status-step" data-step="2"><span>2</span><strong>필요 보험서류</strong></li>
-          <li class="status-step" data-step="3"><span>3</span><strong>제출파일</strong></li>
-          <li class="status-step" data-step="4"><span>4</span><strong>서류 분석</strong></li>
-          <li class="status-step" data-step="5"><span>5</span><strong>확인결과</strong></li>
-          <li class="status-step" data-step="6"><span>6</span><strong>최종 요약</strong></li>
+          <li class="status-step is-active" data-step="1"><span></span><strong>입력</strong></li>
+          <li class="status-step" data-step="2"><span></span><strong>분석</strong></li>
+          <li class="status-step" data-step="3"><span></span><strong>결과</strong></li>
+          <li class="status-step" data-step="4"><span></span><strong>정리</strong></li>
         </ol>
       </aside>
+
       <div class="content-flow">
-    <section class="hero card-soft">
-      <div class="hero-copy">
-        <span class="eyebrow">보험콕검 v0.1</span>
-        <h2>파일은 내 PC에,<br />검토 포인트는 한눈에.</h2>
-        <p class="lead">보험서류에서 확인해야 할 부분을 차분하게 정리합니다.</p>
-        <p class="description">화재보험 · 영업배상책임 · 생산물배상책임 · 여행자보험 항목 여부와 보험기간, 업체명, 주소 후보를 체크리스트로 확인해요.</p>
-        <div class="hero-badges" aria-label="핵심 특징">
-          <span>🛡 서버 전송 없음</span>
-          <span>📌 확인 포인트 자동 정리</span>
-          <span>📄 검토표 다운로드</span>
-        </div>
-      </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="document-illust">
-          <div></div><div></div><div></div><div></div>
-          <span>✓</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="steps" aria-label="진행 단계">
-      <div class="step is-active" data-step="1"><span>1</span> 검토 조건</div>
-      <div class="step" data-step="2"><span>2</span> 필요서류</div>
-      <div class="step" data-step="3"><span>3</span> 제출파일</div>
-      <div class="step" data-step="4"><span>4</span> 분석</div>
-      <div class="step" data-step="5"><span>5</span> 확인결과</div>
-      <div class="step" data-step="6"><span>6</span> 최종요약</div>
-    </section>
-
-    <section class="card section-card" id="checkOptions">
-      <div class="section-head">
-        <div>
-          <h3>1. 확인할 항목 선택</h3>
-          <p>기본 항목은 모두 선택되어 있어요. 필요 없는 항목만 해제하세요.</p>
-        </div>
-      </div>
-
-      <div class="option-group">
-        <h4>보험 유형</h4>
-        <div class="check-grid">
-          <label><input type="checkbox" name="type" value="fire" checked /> 화재보험</label>
-          <label><input type="checkbox" name="type" value="business" checked /> 영업배상책임보험</label>
-          <label><input type="checkbox" name="type" value="product" checked /> 생산물배상책임보험</label>
-          <label><input type="checkbox" name="type" value="travel" checked /> 여행자보험</label>
-        </div>
-      </div>
-
-      <div class="option-group">
-        <h4>공통 확인 항목</h4>
-        <div class="check-grid compact">
-          <label><input type="checkbox" name="common" value="period" checked /> 보험기간</label>
-          <label><input type="checkbox" name="common" value="vendor" checked /> 업체명 후보</label>
-          <label><input type="checkbox" name="common" value="address" checked /> 주소 후보</label>
-        </div>
-      </div>
-
-      <details class="advanced-box">
-        <summary>고급 옵션 열기</summary>
-        <div class="form-grid">
-          <label>
-            계약명
-            <input type="text" id="contractName" placeholder="예: 2026학년도 통학버스 보험서류 검토" />
-          </label>
-          <label>
-            기준 업체명
-            <input type="text" id="vendorName" placeholder="예: ○○관광" />
-          </label>
-        </div>
-        <p class="hint">기준 업체명을 입력하면 서류에서 찾은 업체명 후보와 비교합니다. 입력하지 않아도 콕검은 실행됩니다.</p>
-      </details>
-    </section>
-
-    <section class="card section-card" id="uploadSection">
-      <div class="section-head">
-        <div>
-          <h3>2. 보험서류 올리기</h3>
-          <p>파일명은 상관없습니다. 내용 기준으로 분석합니다.</p>
-        </div>
-      </div>
-
-      <div class="dropzone" id="dropzone">
-        <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" multiple hidden />
-        <div class="upload-icon">↑</div>
-        <strong>PDF, JPG, PNG 파일을 올려주세요</strong>
-        <p>또는 파일을 이곳으로 끌어다 놓으세요</p>
-        <button type="button" class="primary small" id="selectFileButton">파일 선택하기</button>
-      </div>
-
-      <div class="upload-info">
-        <span>지원 형식: PDF · JPG · PNG</span>
-        <span>최대 10개까지 선택 가능</span>
-        <span>권장: 파일 1개당 10MB 이하 · 전체 50MB 이하</span>
-      </div>
-      <p class="security-note">🛡 선택한 파일은 서버로 전송되지 않고 현재 브라우저에서만 분석됩니다.</p>
-    </section>
-
-    <section class="card section-card hidden" id="fileListSection">
-      <div class="section-head simple">
-        <h3>업로드한 파일</h3>
-        <span id="fileTotalText">총 0개 파일</span>
-      </div>
-      <ul class="file-list" id="fileList"></ul>
-    </section>
-
-    <section class="card section-card action-card" id="runSection">
-      <h3>3. 서류 분석 시작</h3>
-      <p>준비가 끝났으면 보험서류를 읽고 확인 포인트를 정리합니다.</p>
-      <div class="action-row">
-        <button type="button" class="ghost" id="resetButton">입력 초기화</button>
-        <button type="button" class="primary" id="runButton" disabled>파일 분석하기</button>
-      </div>
-    </section>
-
-    <section class="card section-card progress-card hidden" id="progressSection" aria-live="polite">
-      <h3>서류 분석 중입니다</h3>
-      <p>보험서류 안의 문구를 읽고 확인 항목을 정리하고 있어요.</p>
-      <div class="progress-meta" id="progressText">현재 진행: 준비 중</div>
-      <div class="progressbar" aria-hidden="true"><div id="progressFill"></div></div>
-      <p class="hint">스캔본이나 흐린 이미지는 글자 인식이 느릴 수 있습니다.</p>
-    </section>
-
-    <section class="results hidden" id="resultsSection">
-      <section class="card section-card">
-        <div class="section-head">
-          <div>
-            <h3>4. 서류 확인결과</h3>
-            <p>보험서류 검토 포인트를 정리했습니다.</p>
+        <section class="hero card-soft">
+          <div class="hero-copy">
+            <span class="eyebrow">보험콕검 v0.1</span>
+            <h2>보험서류, 어디를 봐야 하는지 빠르게 정리해요.</h2>
+            <p class="description">건물화재보험 · 배상책임보험 · 여행자보험의 확인 포인트를 담당자용 체크리스트로 정리합니다.</p>
+            <div class="hero-badges" aria-label="핵심 특징">
+              <span>서버 전송 없음</span>
+              <span>확인 포인트 정리</span>
+              <span>검토 의견 복사</span>
+              <span>검토표 다운로드</span>
+            </div>
           </div>
-        </div>
-        <div class="summary-grid">
-          <div class="summary ok"><span>확인됨</span><strong id="okCount">0건</strong></div>
-          <div class="summary warn"><span>확인 필요</span><strong id="warnCount">0건</strong></div>
-          <div class="summary danger"><span>누락 의심</span><strong id="missingCount">0건</strong></div>
-          <div class="summary gray"><span>분석 어려움</span><strong id="hardCount">0건</strong></div>
-        </div>
-        <p class="notice">최종 판단은 담당자가 원본 서류를 확인해 주세요.</p>
-      </section>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="document-illust">
+              <div></div><div></div><div></div><div></div>
+              <span>✓</span>
+            </div>
+          </div>
+        </section>
 
-      <section class="card section-card">
-        <h3>필수 항목 체크리스트</h3>
-        <div class="table-wrap">
-          <table class="result-table">
-            <thead>
-              <tr><th>검토 항목</th><th>상태</th><th>확인 내용</th></tr>
-            </thead>
-            <tbody id="checklistBody"></tbody>
-          </table>
-        </div>
-      </section>
+        <section class="flow-cards" aria-label="업무 흐름 안내">
+          <article class="flow-card is-active">
+            <span>1</span>
+            <strong>확인 항목 선택</strong>
+            <p>필요한 보험 항목을 고릅니다.</p>
+          </article>
+          <article class="flow-card">
+            <span>2</span>
+            <strong>보험서류 업로드</strong>
+            <p>PDF, JPG, PNG 파일을 올립니다.</p>
+          </article>
+          <article class="flow-card">
+            <span>3</span>
+            <strong>분석 시작</strong>
+            <p>결과와 검토 의견을 확인합니다.</p>
+          </article>
+        </section>
 
-      <section class="card section-card">
-        <h3>파일별 분석 결과</h3>
-        <div class="file-analysis" id="fileAnalysis"></div>
-      </section>
+        <section class="steps" aria-label="진행 단계">
+          <div class="step is-active" data-step="1"><span></span> 입력</div>
+          <div class="step" data-step="2"><span></span> 분석</div>
+          <div class="step" data-step="3"><span></span> 결과</div>
+          <div class="step" data-step="4"><span></span> 정리</div>
+        </section>
 
-      <section class="card section-card">
-        <details class="points-box">
-          <summary>확인 포인트 자세히 보기</summary>
-          <div id="pointsContent" class="points-content"></div>
-        </details>
-      </section>
+        <section class="input-summary hidden" id="inputSummary">
+          <div>
+            <strong>입력 정보</strong>
+            <p id="inputSummaryText">분석 완료</p>
+          </div>
+          <a href="#inputArea">입력 다시 보기</a>
+        </section>
 
-      <section class="card section-card">
-        <h3>검토 의견</h3>
-        <textarea id="opinionText" rows="7" readonly></textarea>
-        <div class="action-row end">
-          <button type="button" class="ghost" id="copyOpinionButton">검토 의견 복사</button>
-          <button type="button" class="ghost" id="saveTxtButton">TXT 저장</button>
-        </div>
-      </section>
+        <div class="input-layout" id="inputArea">
+          <section class="card section-card" id="checkOptions">
+            <div class="section-head">
+              <div>
+                <span class="section-kicker">1단계</span>
+                <h3>확인할 보험 항목</h3>
+                <p>기본 항목은 모두 선택되어 있어요. 필요 없는 항목만 해제하세요.</p>
+              </div>
+            </div>
 
-      <section class="card section-card download-card">
-        <div>
-          <h3>결과 저장</h3>
-          <p>검토 결과를 표 형태 파일로 내려받을 수 있습니다.</p>
+            <div class="option-group">
+              <h4>보험 유형</h4>
+              <div class="check-grid type-grid">
+                <label><input type="checkbox" name="type" value="fire" checked /> <span>건물 화재보험</span></label>
+                <label><input type="checkbox" name="type" value="business" checked /> <span>영업배상책임보험</span></label>
+                <label><input type="checkbox" name="type" value="product" checked /> <span>생산물배상책임보험</span></label>
+                <label><input type="checkbox" name="type" value="travel" checked /> <span>여행자보험</span></label>
+              </div>
+            </div>
+
+            <div class="option-group compact-option">
+              <h4>공통 확인 포인트</h4>
+              <p class="point-line">보험기간 · 피보험자/계약자 · 주소 · 보상한도 문구</p>
+              <div class="check-grid compact">
+                <label><input type="checkbox" name="common" value="period" checked /> <span>보험기간</span></label>
+                <label><input type="checkbox" name="common" value="vendor" checked /> <span>업체명 후보</span></label>
+                <label><input type="checkbox" name="common" value="address" checked /> <span>주소 후보</span></label>
+              </div>
+            </div>
+
+            <details class="advanced-box">
+              <summary>고급 옵션 열기</summary>
+              <div class="form-grid">
+                <label>
+                  계약명
+                  <input type="text" id="contractName" placeholder="예: 2026학년도 통학버스 보험서류 검토" />
+                </label>
+                <label>
+                  기준 업체명
+                  <input type="text" id="vendorName" placeholder="예: ○○관광" />
+                </label>
+              </div>
+              <p class="hint">기준 업체명을 입력하면 서류에서 찾은 업체명 후보와 비교합니다. 입력하지 않아도 콕검은 실행됩니다.</p>
+            </details>
+          </section>
+
+          <section class="card section-card" id="uploadSection">
+            <div class="section-head">
+              <div>
+                <span class="section-kicker">2단계</span>
+                <h3>보험서류 올리기</h3>
+                <p>파일명은 상관없습니다. 내용 기준으로 분석합니다.</p>
+              </div>
+            </div>
+
+            <div class="dropzone" id="dropzone">
+              <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" multiple hidden />
+              <div class="upload-icon">↑</div>
+              <strong>PDF, JPG, PNG 파일을 올려주세요</strong>
+              <p>또는 여기에 끌어다 놓기</p>
+              <button type="button" class="primary small" id="selectFileButton">파일 선택하기</button>
+            </div>
+
+            <div class="upload-info">
+              <span>최대 10개</span>
+              <span>전체 50MB 이하</span>
+              <span>브라우저 내부 분석</span>
+            </div>
+            <p class="security-note">🔒 선택한 파일은 현재 브라우저에서만 분석됩니다.</p>
+
+            <section class="file-list-section hidden" id="fileListSection">
+              <div class="section-head simple">
+                <h3>선택한 파일</h3>
+                <span id="fileTotalText">총 0개 파일</span>
+              </div>
+              <ul class="file-list" id="fileList"></ul>
+            </section>
+          </section>
         </div>
-        <div class="download-actions">
-          <button type="button" class="success" id="downloadCsvButton">엑셀 검토표 다운로드</button>
-          <button type="button" class="ghost" id="copyAllButton">결과 전체 복사</button>
-        </div>
-      </section>
-    </section>
+
+        <section class="card section-card action-card" id="runSection">
+          <div>
+            <span class="section-kicker">3단계</span>
+            <h3>서류 분석 시작</h3>
+            <p>준비가 끝났으면 보험서류를 읽고 확인 포인트를 정리합니다.</p>
+          </div>
+          <div class="action-row">
+            <button type="button" class="ghost" id="resetButton">입력 초기화</button>
+            <button type="button" class="primary" id="runButton" disabled>파일 분석하기</button>
+          </div>
+        </section>
+
+        <section class="card section-card progress-card hidden" id="progressSection" aria-live="polite">
+          <h3>서류 분석 중입니다</h3>
+          <p>보험서류 안의 문구를 읽고 확인 항목을 정리하고 있어요.</p>
+          <div class="progress-meta" id="progressText">현재 진행: 준비 중</div>
+          <div class="progressbar" aria-hidden="true"><div id="progressFill"></div></div>
+          <p class="hint">스캔본이나 흐린 이미지는 글자 인식이 느릴 수 있습니다.</p>
+        </section>
+
+        <section class="results hidden" id="resultsSection">
+          <section class="card section-card result-overview">
+            <div class="section-head">
+              <div>
+                <span class="section-kicker">결과</span>
+                <h3>전체 검토 요약</h3>
+                <p>보험서류 검토 포인트를 담당자 확인 순서대로 정리했습니다.</p>
+              </div>
+            </div>
+            <div class="summary-grid">
+              <div class="summary ok"><span>확인됨</span><strong id="okCount">0건</strong></div>
+              <div class="summary warn"><span>확인 필요</span><strong id="warnCount">0건</strong></div>
+              <div class="summary danger"><span>누락 의심</span><strong id="missingCount">0건</strong></div>
+              <div class="summary gray"><span>분석 어려움</span><strong id="hardCount">0건</strong></div>
+            </div>
+            <p class="notice">최종 판단은 담당자가 원본 서류를 확인해 주세요.</p>
+          </section>
+
+          <section class="card section-card">
+            <div class="section-head simple">
+              <h3>항목별 확인 결과</h3>
+            </div>
+            <div class="table-wrap">
+              <table class="result-table">
+                <thead>
+                  <tr><th>검토 항목</th><th>상태</th><th>확인 내용</th></tr>
+                </thead>
+                <tbody id="checklistBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card section-card">
+            <div class="section-head simple">
+              <h3>파일별 근거</h3>
+            </div>
+            <div class="file-analysis" id="fileAnalysis"></div>
+          </section>
+
+          <section class="card section-card">
+            <details class="points-box">
+              <summary>확인 포인트 자세히 보기</summary>
+              <div id="pointsContent" class="points-content"></div>
+            </details>
+          </section>
+
+          <section class="card section-card opinion-card">
+            <div class="section-head">
+              <div>
+                <h3>검토 의견</h3>
+                <p>담당자가 복사해서 내부 메모나 품의 참고자료로 사용할 수 있어요.</p>
+              </div>
+            </div>
+            <textarea id="opinionText" rows="7" readonly></textarea>
+            <div class="action-row end">
+              <button type="button" class="ghost" id="copyOpinionButton">검토 의견 복사</button>
+              <button type="button" class="ghost" id="saveTxtButton">TXT 저장</button>
+            </div>
+          </section>
+
+          <section class="card section-card download-card">
+            <div>
+              <h3>결과 저장</h3>
+              <p>검토 결과를 표 형태 파일로 내려받을 수 있습니다.</p>
+            </div>
+            <div class="download-actions">
+              <button type="button" class="success" id="downloadCsvButton">엑셀 검토표 다운로드</button>
+              <button type="button" class="ghost" id="copyAllButton">결과 전체 복사</button>
+            </div>
+          </section>
+        </section>
       </div>
     </div>
   </main>
 
+  <div class="bottom-action" id="bottomAction" aria-label="하단 분석 실행 영역">
+    <div class="bottom-status" id="bottomStatus">선택 항목 7개 · 파일 0개</div>
+    <div class="bottom-buttons">
+      <button type="button" class="ghost bottom-reset" id="bottomResetButton">입력 초기화</button>
+      <button type="button" class="primary bottom-run" id="bottomRunButton" disabled>파일 분석하기</button>
+    </div>
+  </div>
+
   <button type="button" class="floating-top" id="floatingTopButton" aria-label="맨 위로 이동">↑</button>
 
   <footer class="footer">
-    <p>보험콕검 v0.1 · senvip · GitHub</p>
-    <p>브라우저 내부 분석 · 서버 전송 없음</p>
+    <p>보험콕검 v0.1 · senvip · <a href="https://github.com/sen-vip/kockgum-insur" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+    <p>브라우저 내부 분석 · 서버 전송 없음 · 최종 확인은 원본 서류 기준</p>
   </footer>
 </body>
 </html>
