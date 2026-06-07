@@ -47,6 +47,7 @@
     bottomStatus: $('#bottomStatus'),
     bottomRunButton: $('#bottomRunButton'),
     bottomResetButton: $('#bottomResetButton'),
+    heroResetButton: $('#heroResetButton'),
     inputSummary: $('#inputSummary'),
     inputSummaryText: $('#inputSummaryText')
   };
@@ -69,6 +70,7 @@
   els.floatingTopButton.addEventListener('click', scrollTop);
   els.bottomRunButton?.addEventListener('click', runAnalysis);
   els.bottomResetButton?.addEventListener('click', resetAll);
+  els.heroResetButton?.addEventListener('click', resetAll);
   $$('input[type="checkbox"]').forEach(input => input.addEventListener('change', updateBottomAction));
   updateBottomAction();
 
@@ -286,9 +288,16 @@
     if (hasAny(text, KEYWORDS.product)) hits.push('생산물배상책임보험');
     if (hasAny(text, KEYWORDS.travel)) hits.push('여행자보험');
 
+    const profile = analyzeEnglishDocument(text);
     const parts = [];
+    if (profile.isEnglish) parts.push('영문 서류 감지');
     if (hits.length) parts.push(`${hits.join(' / ')} 관련 문구 확인`);
+    if (findPolicyNumbers(text).length) parts.push('증권번호 후보 있음');
     if (findPeriods(text).length) parts.push('보험기간 후보 있음');
+    if (findAmountCandidates(text).length) parts.push('보상한도/금액 후보 있음');
+    if (profile.isClauseHeavy) parts.push('약관·면책 조항 페이지 추정');
+    if (profile.coreScore >= 5) parts.push('핵심 확인 페이지 후보');
+    if (/OCR/i.test(method) && profile.isEnglish) parts.push('영문 이미지 OCR 확인 필요');
     if (warning) parts.push(warning);
     if (!text.trim()) parts.push('텍스트를 찾지 못함');
 
@@ -304,29 +313,34 @@
   const KEYWORDS = {
     fire: [
       '화재보험', '화재 보험', '건물화재', '건물 화재', '재산종합보험', '재산 종합 보험',
-      '보험목적물', '보험 목적물', '목적물', '건물', '시설', '집기비품'
+      '보험목적물', '보험 목적물', '목적물', '건물', '시설', '집기비품',
+      'Fire Insurance', 'Property Insurance', 'Package Insurance', 'Property Insured', 'Sum Insured', 'Premises'
     ],
     business: [
       '영업배상책임', '영업 배상 책임', '영업배상책임보험', '영업 배상 책임 보험',
       '시설소유관리자배상', '시설 소유 관리자 배상', '시설소유자배상', '시설 소유자 배상',
       '구내치료비', '구내 치료비', '대인배상', '대물배상',
-      '배상책임보험', '배상 책임 보험', '배상책임', '배상 책임'
+      '배상책임보험', '배상 책임 보험', '배상책임', '배상 책임',
+      'General Liability', 'Public Liability', 'Business Liability', 'Liability Insurance', 'Limit of Liability', 'Any One Occurrence'
     ],
     product: [
       '생산물배상책임', '생산물 배상 책임', '생산물배상책임보험', '생산물 배상 책임 보험',
       '제조물배상책임', '제조물 배상 책임', '제조물책임', '제조물 책임',
-      'PL보험', 'PL 보험', '피엘보험', '피엘 보험'
+      'PL보험', 'PL 보험', '피엘보험', '피엘 보험',
+      'Products Liability', 'Product Liability', 'Aggregate Limit'
     ],
     travel: [
       '여행자보험', '여행자 보험', '여행종합보험', '여행 종합 보험', '국내여행보험', '국내 여행 보험',
       '교육여행', '교육 여행', '수학여행', '수련활동', '현장체험학습', '체험학습',
-      '여행자보험 가입', '여행자 보험 가입', '교육여행단', '부가조건'
+      '여행자보험 가입', '여행자 보험 가입', '교육여행단', '부가조건',
+      'Travel Insurance', 'Travelers Insurance', 'Accident Insurance', 'Medical Expenses', 'Coverage Period'
     ],
     policy: [
       '보험증권', '보험 증권', '증권', '증권 사본', '보험계약증권', '보험 계약 증권',
-      '보험가입증명', '보험 가입 증명', '가입증명', '가입 증명', '보험가입증명서', '보험 가입증명서'
+      '보험가입증명', '보험 가입 증명', '가입증명', '가입 증명', '보험가입증명서', '보험 가입증명서',
+      'Policy No', 'Policy Number', 'Certificate No', 'Certificate Number', 'Insurance Certificate', 'Policy Schedule'
     ],
-    terms: ['보험약관', '보험 약관', '약관', '보통약관', '특별약관', '특약'],
+    terms: ['보험약관', '보험 약관', '약관', '보통약관', '특별약관', '특약', 'Policy Wording', 'Exclusion Clause', 'Endorsement', 'Clause', 'Conditions'],
     receipt: ['보험료납부', '보험료 납부', '납부영수증', '납부 영수증', '영수증', '보험료', '납입영수증', '납입 영수증'],
     individualFee: [
       '개별 피보험자', '피보험자별', '피보험자 별', '보험료가 일일이', '보험료가 표시',
@@ -340,14 +354,114 @@
     belongings: ['휴대품', '휴대 물품', '휴대물품', '휴대품손해', '휴대품 손해', '휴대품손상', '휴대품 손상'],
     period: [
       '보험기간', '보험 기간', '유효기간', '유효 기간', '계약기간', '계약 기간',
-      '보험개시', '보험 개시', '보험종기', '보험 종기', '시기', '종기', '만기'
+      '보험개시', '보험 개시', '보험종기', '보험 종기', '시기', '종기', '만기',
+      'Period of Insurance', 'Policy Period', 'Insurance Period', 'Effective Date', 'Expiry Date', 'Expiration Date', 'Inception Date', 'Coverage Period'
     ],
     amount: [
       '사고당', '사고 당', '1사고당', '1 사고당', '일사고당', '일 사고당',
-      '보험금액', '보험 금액', '가입금액', '가입 금액', '보상한도', '보상 한도', '배상한도', '배상 한도', '보장한도', '보장 한도'
+      '보험금액', '보험 금액', '가입금액', '가입 금액', '보상한도', '보상 한도', '배상한도', '배상 한도', '보장한도', '보장 한도',
+      'Limit of Liability', 'Liability Limit', 'Coverage Limit', 'Sum Insured', 'Amount Insured', 'Indemnity Limit', 'Any One Accident', 'Aggregate Limit'
     ],
-    vendor: ['피보험자', '계약자', '보험계약자', '상호', '업체명', '대표자', '상호명', '법인명', '사업자명'],
-    address: ['주소', '소재지', '사업장', '사업장소재지', '사업장 소재지', '보험목적물', '보험 목적물', '소재장소']
+    vendor: ['피보험자', '계약자', '보험계약자', '상호', '업체명', '대표자', '상호명', '법인명', '사업자명', 'Insured', 'Named Insured', 'Policyholder', 'Assured', 'Applicant', 'The Insured', 'Name of Insured'],
+    address: ['주소', '소재지', '사업장', '사업장소재지', '사업장 소재지', '보험목적물', '보험 목적물', '소재장소', 'Address', 'Location', 'Premises', 'Risk Location', 'Insured Location', 'Situation', 'Property Insured Location']
+  };
+
+  const ENGLISH_CORE_KEYWORDS = [
+    'Policy No', 'Policy Number', 'Certificate No', 'Certificate Number', 'Named Insured', 'Insured',
+    'Policyholder', 'Period of Insurance', 'Policy Period', 'Insurance Period', 'Effective Date',
+    'Expiry Date', 'Expiration Date', 'Limit of Liability', 'Liability Limit', 'Sum Insured',
+    'Amount Insured', 'Risk Location', 'Insured Location', 'Premises', 'Insurance Company',
+    'Insurer', 'Underwriter'
+  ];
+
+  const ENGLISH_CLAUSE_KEYWORDS = [
+    'Exclusion', 'Exclusion Clause', 'Clause', 'Endorsement', 'Policy Wording', 'Sanction',
+    'Pollution', 'Contamination', 'Terrorism', 'Sabotage', 'Pandemic', 'Infectious Disease',
+    'Communicable Disease', 'War', 'Nuclear', 'Limitation', 'Conditions'
+  ];
+
+
+  const ENGLISH_ITEM_GUIDES = {
+    '화재보험': {
+      foundStatus: '영문 후보 확인',
+      found: '영문 문서에서 화재보험/재산보험 관련 표현이 확인되었습니다. 보험기간, 소재지, 가입금액(Sum Insured)을 함께 확인하세요.',
+      missing: '화재보험 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Fire Insurance, Property Insurance, Sum Insured 문구가 있는지 확인하세요.'
+    },
+    '영업배상책임보험': {
+      foundStatus: '영문 후보 확인',
+      found: '영문 문서에서 배상책임보험 관련 표현이 확인되었습니다. Limit of Liability, Any One Occurrence 등 보상한도 문구를 함께 확인하세요.',
+      missing: '영업배상책임보험 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. General Liability, Public Liability, Limit of Liability 문구가 있는지 확인하세요.'
+    },
+    '영업배상책임보험 증권 사본': {
+      foundStatus: '영문 후보 확인',
+      found: '영문 문서에서 보험증권/가입증명 관련 표현이 확인되었습니다. Policy No., Certificate No., Policy Schedule 문구를 기준으로 증권 사본 여부를 확인하세요.',
+      missing: '보험증권 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Policy No., Certificate No., Policy Schedule 문구가 있는지 확인하세요.'
+    },
+    '사고당 보험금액 문구': {
+      foundStatus: '영문 후보 확인',
+      found: '영문 문서에서 보상한도 관련 표현이 확인되었습니다. Limit of Liability, Any One Occurrence, Aggregate Limit 문구와 금액을 함께 확인하세요.',
+      missing: '사고당 보험금액 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Limit of Liability, Any One Occurrence 문구가 있는지 확인하세요.'
+    },
+    '생산물배상책임보험': {
+      foundStatus: '영문 후보 확인',
+      found: '영문 문서에서 생산물배상책임보험 관련 표현이 확인되었습니다. Products Liability 및 Aggregate Limit 문구를 함께 확인하세요.',
+      missing: '생산물배상책임보험 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Products Liability, Product Liability 문구가 있는지 확인하세요.'
+    },
+    '여행자보험': {
+      foundStatus: '영문 후보 확인',
+      found: '영문 문서에서 여행자보험 관련 표현이 확인되었습니다. Coverage Period, Accident, Medical Expenses 문구를 함께 확인하세요.',
+      missing: '여행자보험 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Travel Insurance, Coverage Period 문구가 있는지 확인하세요.'
+    },
+    '여행자보험 증권': {
+      foundStatus: '영문 후보 확인',
+      found: '영문 문서에서 여행자보험 증권 관련 표현이 확인되었습니다. Policy No., Certificate No., Insurance Certificate 문구를 확인하세요.',
+      missing: '여행자보험 증권 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Policy No., Certificate No., Insurance Certificate 문구가 있는지 확인하세요.'
+    },
+    '보험 약관': {
+      foundStatus: '약관 페이지 추정',
+      found: 'Exclusion, Clause, Endorsement 등 약관·면책 조항 표현이 확인되었습니다. 이 페이지는 주요 가입정보보다 약관 확인용에 가깝습니다.',
+      missing: '보험 약관 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Policy Wording, Conditions, Exclusion Clause 문구가 있는지 확인하세요.'
+    },
+    '보험료 납부 영수증': {
+      foundStatus: '영문 후보 확인',
+      found: '보험료 또는 납부 관련 표현이 확인되었습니다. Premium, Receipt, Paid 문구와 금액을 함께 확인하세요.',
+      missing: '보험료 납부 영수증 관련 표현은 뚜렷하게 확인되지 않았습니다. Premium, Receipt, Paid 문구가 있는지 확인하세요.'
+    },
+    '개별 피보험자 보험료 표시': {
+      foundStatus: '확인 필요',
+      found: '피보험자별 보험료 관련 표현 후보가 확인되었습니다. 각 피보험자별 보험료가 분리 표시되어 있는지 원본에서 확인하세요.',
+      missing: '개별 피보험자별 보험료 표시 문구는 뚜렷하게 확인되지 않았습니다. 피보험자 목록과 보험료 산출 내역을 원본에서 확인하세요.'
+    },
+    '상해 사망·후유장애 항목': {
+      foundStatus: '영문 후보 확인',
+      found: '상해 사망·후유장애에 해당할 수 있는 Accident, Death, Disability 관련 표현이 확인되었습니다. 보장금액을 함께 확인하세요.',
+      missing: '상해 사망·후유장애 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Accident, Death, Disability 문구가 있는지 확인하세요.'
+    },
+    '상해 치료실비 항목': {
+      foundStatus: '영문 후보 확인',
+      found: '상해 치료실비에 해당할 수 있는 Medical Expenses 관련 표현이 확인되었습니다. 보장금액과 보장범위를 함께 확인하세요.',
+      missing: '상해 치료실비 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Medical Expenses, Injury Medical 문구가 있는지 확인하세요.'
+    },
+    '질병 사망·후유장애 항목': {
+      foundStatus: '확인 필요',
+      found: '질병 사망·후유장애 관련 표현 후보가 확인되었습니다. 질병 관련 담보와 보장금액을 원본에서 확인하세요.',
+      missing: '질병 사망·후유장애 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Disease, Sickness, Death, Disability 문구가 있는지 확인하세요.'
+    },
+    '질병 치료실비 항목': {
+      foundStatus: '확인 필요',
+      found: '질병 치료실비 관련 표현 후보가 확인되었습니다. 질병 의료비 담보와 보장금액을 원본에서 확인하세요.',
+      missing: '질병 치료실비 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Disease, Sickness, Medical Expenses 문구가 있는지 확인하세요.'
+    },
+    '배상책임 항목': {
+      foundStatus: '영문 후보 확인',
+      found: '배상책임 관련 표현이 확인되었습니다. Liability, Limit of Liability, Any One Occurrence 문구와 금액을 함께 확인하세요.',
+      missing: '배상책임 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Liability, Limit of Liability 문구가 있는지 확인하세요.'
+    },
+    '휴대품 항목': {
+      foundStatus: '확인 필요',
+      found: '휴대품 담보 관련 표현 후보가 확인되었습니다. Baggage, Personal Effects, Belongings 문구와 보장금액을 확인하세요.',
+      missing: '휴대품 담보 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Baggage, Personal Effects 문구가 있는지 확인하세요.'
+    }
   };
 
   function buildChecklist(extractions) {
@@ -355,15 +469,37 @@
     const selectedTypes = selectedValues('type');
     const selectedCommon = selectedValues('common');
     const rows = [];
+    const englishProfile = analyzeEnglishDocument(allText);
+    const englishFiles = extractions.filter(item => analyzeEnglishDocument(item.text).isEnglish);
+    const clauseFiles = extractions.filter(item => analyzeEnglishDocument(item.text).isClauseHeavy);
+    const ocrEnglishFiles = extractions.filter(item => /OCR/i.test(item.method) && analyzeEnglishDocument(item.text).isEnglish);
+    const pageCandidates = findEnglishPageCandidates(extractions);
     const pointGroups = {
       '화재보험 관련 문구': collectKeywords(allText, KEYWORDS.fire),
       '배상책임 관련 문구': collectKeywords(allText, [...KEYWORDS.business, ...KEYWORDS.product, ...KEYWORDS.liability]),
       '여행자보험 관련 문구': collectKeywords(allText, [...KEYWORDS.travel, ...KEYWORDS.injuryDeath, ...KEYWORDS.injuryMedical, ...KEYWORDS.diseaseDeath, ...KEYWORDS.diseaseMedical, ...KEYWORDS.belongings]),
+      '영문 핵심정보 후보': collectKeywords(allText, ENGLISH_CORE_KEYWORDS),
+      '영문 약관·면책 조항 후보': collectKeywords(allText, ENGLISH_CLAUSE_KEYWORDS),
+      '증권번호 후보': findPolicyNumbers(allText),
       '기간 후보': findPeriods(allText),
       '금액/보상한도 후보': findAmountCandidates(allText),
       '업체명 후보': findVendorCandidates(allText),
-      '주소 후보': findAddressCandidates(allText)
+      '주소 후보': findAddressCandidates(allText),
+      '확인 페이지 후보': pageCandidates
     };
+
+    if (englishFiles.length) {
+      rows.push({ item: '영문 보험서류 감지', status: '영문 확인 필요', detail: `영문 보험 키워드가 감지되었습니다. 영문 기준으로 보험기간, 피보험자, 주소, 보상한도 후보를 함께 확인합니다.` });
+    }
+    if (pageCandidates.length) {
+      rows.push({ item: '핵심 확인 페이지 후보', status: '영문 확인 필요', detail: pageCandidates.slice(0, 3).join(' / ') });
+    }
+    if (clauseFiles.length) {
+      rows.push({ item: '영문 약관·면책 조항 페이지', status: '약관 페이지 추정', detail: 'Exclusion Clause, Endorsement 등 약관·면책 조항 중심 페이지가 포함되어 있습니다. 보험기간, 피보험자, 주소, 보상한도는 증권 첫 장 또는 가입증명서 요약 페이지에서 확인해 주세요.' });
+    }
+    if (ocrEnglishFiles.length) {
+      rows.push({ item: '영문 이미지 OCR 확인', status: 'OCR 확인 필요', detail: '영문 이미지 서류는 OCR 인식 상태에 따라 일부 항목이 누락될 수 있습니다. 원본 PDF 또는 선명한 이미지로 추가 확인해 주세요.' });
+    }
 
     if (selectedTypes.includes('fire')) rows.push(rowFromKeyword('화재보험', allText, KEYWORDS.fire, '화재보험 관련 문구 확인'));
     if (selectedTypes.includes('business')) {
@@ -388,16 +524,16 @@
 
     if (selectedCommon.includes('period')) {
       const periods = findPeriods(allText);
-      rows.push({ item: '보험기간', status: periods.length ? '확인 필요' : '누락 의심', detail: periods.length ? `기간 후보 있음: ${periods.slice(0, 2).join(', ')}` : '보험기간 또는 유효기간 문구를 찾지 못했습니다.' });
+      rows.push({ item: '보험기간', status: periods.length ? (englishProfile.isEnglish ? '영문 후보 확인' : '확인 필요') : (englishProfile.isEnglish ? '확인 필요' : '누락 의심'), detail: periods.length ? `기간 후보 확인: ${periods.slice(0, 2).join(', ')}` : (englishProfile.isEnglish ? '보험기간 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Policy Period, Period of Insurance, Effective Date, Expiry Date 문구가 있는지 확인하세요.' : '보험기간 또는 유효기간 문구를 찾지 못했습니다.') });
     }
     if (selectedCommon.includes('vendor')) {
       const vendors = findVendorCandidates(allText);
       const basis = $('#vendorName').value.trim();
-      rows.push({ item: '업체명 후보', status: vendors.length ? '확인 필요' : '누락 의심', detail: vendors.length ? `업체명 후보: ${vendors.slice(0, 3).join(', ')}${basis ? ` / 기준 업체명: ${basis}` : ''}` : '업체명 후보를 찾지 못했습니다.' });
+      rows.push({ item: '업체명 후보', status: vendors.length ? (englishProfile.isEnglish ? '영문 후보 확인' : '확인 필요') : (englishProfile.isEnglish ? '확인 필요' : '누락 의심'), detail: vendors.length ? `피보험자/계약자 후보: ${vendors.slice(0, 3).join(', ')}${basis ? ` / 기준 업체명: ${basis}` : ''}` : (englishProfile.isEnglish ? '피보험자/계약자 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Named Insured, Insured, Policyholder, Applicant 문구가 있는지 확인하세요.' : '업체명 후보를 찾지 못했습니다.') });
     }
     if (selectedCommon.includes('address')) {
       const addresses = findAddressCandidates(allText);
-      rows.push({ item: '주소 후보', status: addresses.length ? '확인 필요' : '누락 의심', detail: addresses.length ? `주소 후보 있음: ${addresses.slice(0, 2).join(' / ')}` : '명확한 주소 후보를 찾지 못했습니다.' });
+      rows.push({ item: '주소 후보', status: addresses.length ? (englishProfile.isEnglish ? '영문 후보 확인' : '확인 필요') : (englishProfile.isEnglish ? '확인 필요' : '누락 의심'), detail: addresses.length ? `주소/소재지 후보: ${addresses.slice(0, 2).join(' / ')}` : (englishProfile.isEnglish ? '주소/소재지 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. Address, Location, Premises, Risk Location 문구가 있는지 확인하세요.' : '명확한 주소 후보를 찾지 못했습니다.') });
     }
 
     if (extractions.some(item => item.warning || !item.text.trim())) {
@@ -409,20 +545,63 @@
 
   function rowFromKeyword(item, text, keywords, successDetail) {
     const hits = collectKeywords(text, keywords);
-    if (hits.length) return { item, status: '확인됨', detail: `${successDetail}: ${hits.slice(0, 4).join(', ')}` };
+    const englishProfile = analyzeEnglishDocument(text);
+    const englishHits = hits.filter(hit => /[A-Za-z]/.test(hit));
+    const koreanHits = hits.filter(hit => /[가-힣]/.test(hit));
+    const guide = ENGLISH_ITEM_GUIDES[item];
+
+    if (englishProfile.isEnglish && item === '보험 약관' && englishProfile.clauseHits.length) {
+      return {
+        item,
+        status: '약관 페이지 추정',
+        detail: `약관·면책 조항 표현 확인: ${englishProfile.clauseHits.slice(0, 4).join(', ')}. 이 페이지는 주요 가입정보보다 약관 확인용에 가깝습니다.`
+      };
+    }
+
+    if (hits.length) {
+      if (englishProfile.isEnglish && englishHits.length && !koreanHits.length) {
+        return {
+          item,
+          status: guide?.foundStatus || '영문 후보 확인',
+          detail: `${guide?.found || '영문 문서에서 관련 표현이 확인되었습니다.'} 확인된 표현: ${englishHits.slice(0, 4).join(', ')}`
+        };
+      }
+      return { item, status: '확인됨', detail: `${successDetail}: ${hits.slice(0, 4).join(', ')}` };
+    }
+
     const similar = weakMatch(item, text);
-    if (similar) return { item, status: '확인 필요', detail: '유사 문구가 있어 원본 서류 확인이 필요합니다.' };
+    if (similar) {
+      return {
+        item,
+        status: englishProfile.isEnglish ? '확인 필요' : '확인 필요',
+        detail: englishProfile.isEnglish
+          ? `${guide?.missing || '관련 영문 표현은 뚜렷하게 확인되지 않았습니다. 원본 증권 요약 페이지에서 확인하세요.'}`
+          : '유사 문구가 있어 원본 서류 확인이 필요합니다.'
+      };
+    }
+
+    if (englishProfile.isEnglish) {
+      return {
+        item,
+        status: guide?.missing ? '확인 필요' : '관련 문구 없음',
+        detail: guide?.missing || '해당 항목 관련 영문 표현은 뚜렷하게 확인되지 않았습니다. 원본 증권 요약 페이지를 확인하세요.'
+      };
+    }
     return { item, status: '누락 의심', detail: '해당 항목 관련 문구를 찾지 못했습니다.' };
   }
 
   function buildOpinion(rows) {
     const confirmed = rows.filter(row => row.status === '확인됨').map(row => row.item);
     const needCheck = rows.filter(row => row.status === '확인 필요').map(row => row.item);
+    const englishNeed = rows.filter(row => row.status === '영문 확인 필요' || row.status === '영문 후보 확인').map(row => row.item);
+    const clause = rows.filter(row => row.status === '약관 페이지 추정').map(row => row.item);
     const missing = rows.filter(row => row.status === '누락 의심').map(row => row.item);
-    const hard = rows.filter(row => row.status === '분석 어려움').map(row => row.item);
+    const hard = rows.filter(row => row.status === '분석 어려움' || row.status === 'OCR 확인 필요').map(row => row.item);
 
     const lines = [];
     if (confirmed.length) lines.push(`${confirmed.slice(0, 6).join(', ')} 관련 문구는 확인되었습니다.`);
+    if (englishNeed.length) lines.push(`${englishNeed.slice(0, 6).join(', ')} 항목은 영문 기준으로 원본 증권 요약 페이지 확인이 필요합니다.`);
+    if (clause.length) lines.push(`${clause.slice(0, 4).join(', ')} 항목은 약관·면책 조항 페이지로 추정됩니다. 핵심 정보는 증권 첫 장 또는 가입증명서 요약 페이지에서 확인해 주세요.`);
     if (needCheck.length) lines.push(`${needCheck.slice(0, 6).join(', ')} 항목은 추가 확인이 필요합니다.`);
     if (missing.length) lines.push(`${missing.slice(0, 6).join(', ')} 항목은 업로드 파일에서 명확히 확인되지 않아 누락 의심됩니다.`);
     if (hard.length) lines.push('일부 파일은 글자 인식이 어렵거나 분석 제한이 있어 원본 서류 확인이 필요합니다.');
@@ -434,7 +613,7 @@
   function renderResults() {
     const counts = countStatuses(state.rows);
     els.okCount.textContent = `${counts['확인됨']}건`;
-    els.warnCount.textContent = `${counts['확인 필요']}건`;
+    els.warnCount.textContent = `${(counts['확인 필요'] || 0) + (counts['영문 확인 필요'] || 0) + (counts['영문 후보 확인'] || 0) + (counts['관련 문구 없음'] || 0) + (counts['약관 페이지 추정'] || 0) + (counts['OCR 확인 필요'] || 0)}건`;
     els.missingCount.textContent = `${counts['누락 의심']}건`;
     els.hardCount.textContent = `${counts['분석 어려움']}건`;
 
@@ -499,43 +678,110 @@
     const patterns = [
       /\d{4}[.\-\/년\s]+\d{1,2}[.\-\/월\s]+\d{1,2}\s*(?:일)?\s*[~∼-]\s*\d{4}[.\-\/년\s]+\d{1,2}[.\-\/월\s]+\d{1,2}/g,
       /\d{4}[.\-\/]\d{1,2}[.\-\/]\d{1,2}/g,
-      /\d{4}년\s*\d{1,2}월\s*\d{1,2}일/g
+      /\d{4}년\s*\d{1,2}월\s*\d{1,2}일/g,
+      /(?:Period of Insurance|Policy Period|Insurance Period|Coverage Period|Effective Date|Expiry Date|Expiration Date|Inception Date)\s*[:：]?\s*[^\n]{0,90}/gi,
+      /\b\d{1,2}\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\s*\d{4}\b/gi,
+      /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\s*\d{1,2},?\s*\d{4}\b/gi,
+      /\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/g
     ];
-    return uniqueMatches(text, patterns).slice(0, 6);
+    return uniqueMatches(text, patterns).slice(0, 8);
   }
 
   function findAmountCandidates(text) {
     const patterns = [
       /(?:사고당|사고\s*당|1\s*사고당|일\s*사고당|보험금액|가입금액|보상한도|배상한도|보장한도)[^\n]{0,40}?(?:\d{1,3}(?:,\d{3})+|\d+)\s*(?:원|만원|천만원|억원)/g,
       /(?:\d{1,3}(?:,\d{3})+|\d+)\s*(?:원|만원|천만원|억원)[^\n]{0,25}?(?:사고당|사고\s*당|보험금액|가입금액|보상한도|배상한도|보장한도)/g,
-      /(?:\d+)\s*(?:억|억원|천만원|만원)/g
+      /(?:\d+)\s*(?:억|억원|천만원|만원)/g,
+      /(?:Limit of Liability|Liability Limit|Coverage Limit|Sum Insured|Amount Insured|Indemnity Limit|Any One Occurrence|Any One Accident|Aggregate Limit)[^\n]{0,80}?(?:USD|KRW|\$|₩)?\s*\d{1,3}(?:,\d{3})+(?:\.\d+)?/gi,
+      /(?:USD|KRW|\$|₩)\s*\d{1,3}(?:,\d{3})+(?:\.\d+)?[^\n]{0,60}?(?:Limit|Liability|Insured|Occurrence|Accident|Aggregate)/gi
     ];
-    return uniqueMatches(text, patterns).slice(0, 8);
+    return uniqueMatches(text, patterns).slice(0, 10);
   }
 
   function findVendorCandidates(text) {
     const lines = text.split(/\n|\r/).map(line => line.trim()).filter(Boolean);
     const candidates = [];
-    const patterns = [/피보험자\s*[:：]?\s*([^\n]{2,30})/i, /계약자\s*[:：]?\s*([^\n]{2,30})/i, /상호\s*[:：]?\s*([^\n]{2,30})/i, /업체명\s*[:：]?\s*([^\n]{2,30})/i];
+    const patterns = [
+      /피보험자\s*[:：]?\s*([^\n]{2,50})/i, /계약자\s*[:：]?\s*([^\n]{2,50})/i, /상호\s*[:：]?\s*([^\n]{2,50})/i, /업체명\s*[:：]?\s*([^\n]{2,50})/i,
+      /(?:Named\s+Insured|Name\s+of\s+Insured|The\s+Insured|Insured|Policyholder|Assured|Applicant)\s*[:：]?\s*([^\n]{2,70})/i
+    ];
     for (const line of lines) {
       for (const pattern of patterns) {
         const match = line.match(pattern);
         if (match?.[1]) candidates.push(cleanCandidate(match[1]));
       }
     }
-    return [...new Set(candidates.filter(Boolean))].slice(0, 6);
+    return [...new Set(candidates.filter(Boolean))].slice(0, 8);
   }
 
   function findAddressCandidates(text) {
     const lines = text.split(/\n|\r/).map(line => line.trim()).filter(Boolean);
-    const regionPattern = /(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충청북도|충남|충청남도|전북|전라북도|전남|전라남도|경북|경상북도|경남|경상남도|제주)[^\n]{5,80}/;
+    const regionPattern = /(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충청북도|충남|충청남도|전북|전라북도|전남|전라남도|경북|경상북도|경남|경상남도|제주)[^\n]{5,90}/;
+    const englishPattern = /(?:Address|Location|Premises|Risk\s+Location|Insured\s+Location|Situation|Property\s+Insured\s+Location)\s*[:：]?\s*([^\n]{5,100})/i;
     const candidates = [];
     for (const line of lines) {
+      const english = line.match(englishPattern);
       if (line.includes('주소') || line.includes('소재지') || line.includes('사업장') || regionPattern.test(line)) {
         candidates.push(cleanCandidate(line));
       }
+      if (english?.[1]) candidates.push(cleanCandidate(english[1]));
+    }
+    return [...new Set(candidates)].slice(0, 8);
+  }
+
+  function findPolicyNumbers(text) {
+    const patterns = [
+      /(?:Policy\s*(?:No\.?|Number)|Certificate\s*(?:No\.?|Number)|Reference\s*No\.?)\s*[:：]?\s*[A-Z0-9\-\/]{4,40}/gi,
+      /(?:증권번호|가입증명서번호|계약번호)\s*[:：]?\s*[A-Z0-9가-힣\-\/]{4,40}/gi
+    ];
+    return uniqueMatches(text, patterns).slice(0, 8);
+  }
+
+  function analyzeEnglishDocument(text) {
+    const source = String(text || '');
+    const compact = source.toLowerCase();
+    const asciiLetters = (source.match(/[A-Za-z]/g) || []).length;
+    const koreanLetters = (source.match(/[가-힣]/g) || []).length;
+    const isEnglish = asciiLetters >= 30 && asciiLetters > koreanLetters;
+    const coreHits = collectKeywords(source, ENGLISH_CORE_KEYWORDS);
+    const clauseHits = collectKeywords(source, ENGLISH_CLAUSE_KEYWORDS);
+    const coreScore = coreHits.length * 2
+      + Math.min(findPolicyNumbers(source).length, 2) * 3
+      + Math.min(findPeriods(source).length, 2) * 2
+      + Math.min(findAmountCandidates(source).length, 2) * 2
+      + Math.min(findVendorCandidates(source).length, 2)
+      + Math.min(findAddressCandidates(source).length, 2);
+    const clauseScore = clauseHits.length + ((source.match(/Exclusion|Clause|Endorsement/gi) || []).length);
+    const isClauseHeavy = isEnglish && clauseScore >= 4 && coreScore < 8;
+    return { isEnglish, coreHits, clauseHits, coreScore, clauseScore, isClauseHeavy };
+  }
+
+  function findEnglishPageCandidates(extractions) {
+    const candidates = [];
+    for (const extraction of extractions) {
+      const chunks = splitIntoPageLikeChunks(extraction.text);
+      chunks.forEach((chunk, index) => {
+        const profile = analyzeEnglishDocument(chunk);
+        if (!profile.isEnglish && profile.coreScore < 5) return;
+        if (profile.isClauseHeavy) return;
+        if (profile.coreScore >= 5) {
+          const label = chunks.length > 1 ? `${extraction.file.name} ${index + 1}쪽` : extraction.file.name;
+          const hints = [
+            ...findPolicyNumbers(chunk).slice(0, 1),
+            ...collectKeywords(chunk, ENGLISH_CORE_KEYWORDS).slice(0, 3)
+          ];
+          candidates.push(`${label}: 핵심 확인 후보${hints.length ? `(${hints.join(', ')})` : ''}`);
+        }
+      });
     }
     return [...new Set(candidates)].slice(0, 6);
+  }
+
+  function splitIntoPageLikeChunks(text) {
+    const source = String(text || '').trim();
+    if (!source) return [];
+    const chunks = source.split(/---\s*page\s*\d+\s*(?:OCR)?\s*---/i).map(part => part.trim()).filter(Boolean);
+    return chunks.length ? chunks : [source];
   }
 
   function uniqueMatches(text, patterns) {
@@ -552,18 +798,25 @@
   }
 
   function normalizeText(text) {
-    return String(text || '').replace(/[［\[【]/g, ' ').replace(/[］\]】]/g, ' ').replace(/\s+/g, ' ').trim();
+    return String(text || '')
+      .replace(/[［\[【]/g, ' ')
+      .replace(/[］\]】]/g, ' ')
+      .replace(/\r/g, '\n')
+      .split('\n')
+      .map(line => line.replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+      .join('\n');
   }
 
   function countStatuses(rows) {
     return rows.reduce((acc, row) => {
       acc[row.status] = (acc[row.status] || 0) + 1;
       return acc;
-    }, { '확인됨': 0, '확인 필요': 0, '누락 의심': 0, '분석 어려움': 0 });
+    }, { '확인됨': 0, '확인 필요': 0, '영문 확인 필요': 0, '영문 후보 확인': 0, '관련 문구 없음': 0, '약관 페이지 추정': 0, 'OCR 확인 필요': 0, '누락 의심': 0, '분석 어려움': 0 });
   }
 
   function statusBadge(status) {
-    const cls = status === '확인됨' ? 'ok' : status === '확인 필요' ? 'warn' : status === '누락 의심' ? 'danger' : 'gray';
+    const cls = status === '확인됨' ? 'ok' : (status === '확인 필요' || status === '영문 확인 필요' || status === '영문 후보 확인' || status === '관련 문구 없음') ? 'warn' : status === '약관 페이지 추정' ? 'clause' : status === '누락 의심' ? 'danger' : 'gray';
     return `<span class="status ${cls}">${status}</span>`;
   }
 

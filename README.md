@@ -11,8 +11,8 @@
 
 ## 🔗 바로가기
 
-* 웹앱 바로가기: https://sen-vip.github.io/kockgum-insur/
-* GitHub 저장소: https://github.com/sen-vip/kockgum-insur
+* 웹앱 바로가기: https://sen-vip.github.io/boheom-kockgum/
+* 도움말: https://sen-vip.github.io/boheom-kockgum/
 
 ---
 
